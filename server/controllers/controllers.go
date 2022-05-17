@@ -58,24 +58,13 @@ func DeleteBook(c *fiber.Ctx) error {
 }
 
 func AmendBook(c *fiber.Ctx) error {
-	var data map[string]string
-	if err := c.BodyParser(&data); err != nil {
+	var book models.Book
+	if err := c.BodyParser(&book); err != nil {
 		return c.Status(403).JSON(fiber.Map{
 			"message": "wrong body parameters",
 		})
 	}
-	title, author := data["title"], data["author"]
-	book := models.Book{
-		Title:  title,
-		Author: author,
-	}
-	id, err := strconv.ParseUint(data["id"], 10, 32)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"message": "failed to parse book id",
-		})
-	}
-	if database.DB.Model(&book).Where("id = ?", id).Updates(&book).RowsAffected == 0 {
+	if database.DB.Model(&book).Where("id = ?", book.Id).Updates(&book).RowsAffected == 0 {
 		database.DB.Create(&book)
 	}
 	// return c.JSON(fiber.Map{

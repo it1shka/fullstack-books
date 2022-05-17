@@ -1,17 +1,36 @@
 import styled from "styled-components"
-import {FormEvent, useState} from 'react'
-import { useRecoilState } from "recoil"
-import booksAtom from "../store"
+import React, {FormEvent, useState} from 'react'
+import { useSetRecoilState,  useRecoilState } from "recoil"
+import { booksAtom, updatingBookAtom } from "../store"
 import api from "../api"
 
 const BookForm = () => {
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
 
-  const [_, setBooks] = useRecoilState(booksAtom)
+  const [updating, setUpdating] = useRecoilState(updatingBookAtom)
+  const setBooks = useSetRecoilState(booksAtom)
 
   const onFormSubmit = (event: FormEvent) => {
     event.preventDefault()
+
+    if(updating) {
+      api.updateBook(updating).then(book => {
+        if(!book) {
+          alert('Failed to update book!')
+          return
+        }
+        setBooks(prev => prev.map(nxtbook => {
+          if(nxtbook.id === book.id) {
+            return book
+          }
+          return nxtbook
+        }))
+        setUpdating(null)
+      })
+      return
+    }
+
     api.addBook(author, title).then(book => {
       if(!book) {
         window.alert('Failed to add a book!')
@@ -23,17 +42,35 @@ const BookForm = () => {
     setTitle('')
   }
 
+  const handleAuthorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    if(updating) {
+      setUpdating(prev => ({...prev!, author: value}))
+    } else {
+      setAuthor(value)
+    }
+  }
+
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    if(updating) {
+      setUpdating(prev => ({...prev!, title: value}))
+    } else {
+      setTitle(value)
+    }
+  }
+
   return (
     <Form onSubmit={onFormSubmit}>
-      <Input
+      <Input required
         placeholder="Author..."
-        value={author}
-        onChange={e => setAuthor(e.target.value)}
+        value={updating ? updating.author : author}
+        onChange={handleAuthorChange}
       />
-      <Input
+      <Input required
         placeholder="Title..."
-        value={title}
-        onChange={e => setTitle(e.target.value)}
+        value={updating ? updating.title : title}
+        onChange={handleTitleChange}
       />
       <Button type="submit">Add</Button>
     </Form>

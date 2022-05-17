@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useRecoilState } from "recoil"
 import styled from "styled-components"
 import api from "../api"
-import booksAtom from "../store"
+import { booksAtom } from "../store"
 import BookElement from "./BookElement"
 
 const BookList = () => {

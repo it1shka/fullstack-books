@@ -7,7 +7,8 @@ class API {
       const responce = await axios.get('/all')
       const books = responce.data as Book[]
       return books
-    } catch {
+    } catch(err) {
+      console.log(err)
       return []
     }
   }
@@ -18,13 +19,15 @@ class API {
       const responce = await axios.post('/add', body)
       const book = responce.data as Book
       return book
-    } catch {
+    } catch(err) {
+      console.log(err)
       return null
     }
   }
 
-  deleteBook(id: number) {
-    axios.delete('/delete', {data: {id}})
+  async deleteBook(id: number) {
+    const responce = await axios.delete(`/delete?id=${id}`)
+    return responce.status === 200
   }
 
   async updateBook(book: Book) {
@@ -32,7 +35,8 @@ class API {
       const responce = await axios.put('/update', book)
       const updatedBook = responce.data as Book
       return updatedBook
-    } catch {
+    } catch(err) {
+      console.log(err)
       return null
     }
   }

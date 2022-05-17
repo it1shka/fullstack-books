@@ -6,11 +6,17 @@ export interface Book {
   title: string
 }
 
-const initial: Book[] = []
-
-const booksAtom = atom({
+export const booksAtom = atom<Book[]>({
   key: 'books',
-  default: initial
+  default: []
 })
 
-export default booksAtom
+export const currentAtom = atom<number | null>({
+  key: 'current',
+  default: null
+})
+
+export const updatingBookAtom = atom<Book | null>({
+  key: 'updatingBook',
+  default: null
+})
